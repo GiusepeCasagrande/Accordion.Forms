@@ -45,7 +45,8 @@ namespace Accordion.Forms
 				{
 					BackgroundColor = isGreen? Color.Green : Color.Blue,
 					HeightRequest = 100,
-					HorizontalOptions = LayoutOptions.FillAndExpand
+					HorizontalOptions = LayoutOptions.FillAndExpand,
+					VerticalOptions = LayoutOptions.FillAndExpand
 				};
 				cell.BindingContext = item;
 

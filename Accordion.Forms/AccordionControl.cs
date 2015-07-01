@@ -22,7 +22,7 @@ namespace Accordion.Forms
 		/// <value>The default color of the button text.</value>
 		public Color DefaultButtonTextColor { get; set; }
 
-		readonly List<AccordionEntry> m_entries = new List<AccordionEntry>();
+		readonly List<AccordionEntry> m_entries = new List<AccordionEntry> ();
 		ScrollView m_scrollView;
 		StackLayout m_layout;
 
@@ -31,25 +31,23 @@ namespace Accordion.Forms
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Photon.Controls.AccordionControl"/> class.
 		/// </summary>
-		public AccordionControl(View header = null)
+		public AccordionControl (View header = null)
 		{
-			AnimationDuration = 300;
+			AnimationDuration = 400;
 			BackgroundColor = DefaultButtonBackgroundColor;
 			DefaultButtonTextColor = Color.Black;
-			Padding = new Thickness(0, 0, 0, 0);
+			Padding = new Thickness (0, 0, 0, 0);
 
-			m_layout = new StackLayout()
-			{
-				BackgroundColor = Color.White,
+			m_layout = new StackLayout () {
+				BackgroundColor = DefaultButtonBackgroundColor,
 				Orientation = StackOrientation.Vertical,
 				Spacing = 0
 			};
 
 			if (header != null)
-				m_layout.Children.Add(header);
+				m_layout.Children.Add (header);
 
-			m_scrollView = new ScrollView()
-			{
+			m_scrollView = new ScrollView () {
 				BackgroundColor = DefaultButtonBackgroundColor,
 				Content = m_layout,
 				Orientation = ScrollOrientation.Vertical,
@@ -65,97 +63,95 @@ namespace Accordion.Forms
 		/// </summary>
 		/// <param name="cell">cell.</param>
 		/// <param name="view">View.</param>
-		public void Add(View cell, View view)
+		public void Add (View cell, View view)
 		{
 			if (cell == null)
-				throw new ArgumentNullException("cell");
+				throw new ArgumentNullException ("cell");
 
 			if (view == null)
-				throw new ArgumentNullException("view");
+				throw new ArgumentNullException ("view");
 
-			m_entries.Add(new AccordionEntry()
-				{
-					Cell = cell,
-					View = view,
-					OriginalSize = new Size(view.WidthRequest, view.HeightRequest)
-				});
+			var entry = new AccordionEntry () {
+				Cell = cell,
+				View = new ScrollView () {
+					Content = view,
 
-			var line = new StackLayout()
-			{
+				},
+				OriginalSize = new Size (view.WidthRequest, view.HeightRequest)
+			};
+
+			m_entries.Add (entry);
+
+			var line = new StackLayout () {
 				Orientation = StackOrientation.Vertical
 			};
 
-			line.Children.Add(cell);
-			line.Children.Add(view);
+			line.Children.Add (entry.Cell);
+			line.Children.Add (entry.View);
 
-			m_layout.Children.Add(line);
+			m_layout.Children.Add (line);
 
 			var cellIndex = m_entries.Count - 1;
 
-			var tapGestureRecognizer = new TapGestureRecognizer();
-			tapGestureRecognizer.Tapped	+= (object sender, EventArgs e) => OncellTouchUpInside(cellIndex);
-			cell.GestureRecognizers.Add(tapGestureRecognizer);
+			var tapGestureRecognizer = new TapGestureRecognizer ();
+			tapGestureRecognizer.Tapped	+= (object sender, EventArgs e) => OncellTouchUpInside (cellIndex);
+			cell.GestureRecognizers.Add (tapGestureRecognizer);
 		}
 
 		/// <summary>
 		/// Closes all entries.
 		/// </summary>
-		public void CloseAllEntries()
+		public void CloseAllEntries ()
 		{
-			foreach (var entry in m_entries)
-			{
-				CloseAccordion(entry);
+			foreach (var entry in m_entries) {
+				entry.View.HeightRequest = 0;
 				entry.IsOpen = false;
+				entry.View.IsVisible = false;
 			}
 		}
 
-		async void CloseAccordion(AccordionEntry entry)
+		async void OpenAccordion (AccordionEntry entry)
 		{
-			var view = entry.View;
-			var b = view.Bounds;
-			b.Height = 0;
-
-			await view.LayoutTo(b, AnimationDuration, Easing.SinInOut);
-
-			view.IsVisible = false;
-			view.IsEnabled = false;
+			entry.View.Animate ("expand",
+				x => {
+					entry.View.IsVisible = true;
+					entry.View.HeightRequest = entry.OriginalSize.Height * x;
+				}, 0, AnimationDuration, Easing.SpringOut, (d, b) => {
+					entry.View.IsVisible = true;
+				});
 		}
 
-		async void OpenAccordion(AccordionEntry entry)
+		async void CloseAccordion (AccordionEntry entry)
 		{
-			var view = entry.View;
-			view.IsVisible = true;
-			view.IsEnabled = true;
-
-			var b = view.Bounds;
-			b.Height = 0;
-			view.Layout(b);
-
-			b.Height = entry.OriginalSize.Height;
-
-			await view.LayoutTo(b, AnimationDuration, Easing.SinInOut);
+			entry.View.Animate ("colapse",
+				x => {
+					var change = entry.OriginalSize.Height * x;
+					entry.View.HeightRequest = entry.OriginalSize.Height - change;
+				}, 0, AnimationDuration, Easing.SpringIn, (d, b) => {
+					entry.View.IsVisible = false;
+				});
 		}
+
+
 
 		/// <summary>
 		/// Raises the cell touch up inside event.
 		/// </summary>
 		/// <param name="cellIndex">cell index.</param>
-		void OncellTouchUpInside(int cellIndex)
+		void OncellTouchUpInside (int cellIndex)
 		{
-			var touchedEntry = m_entries[cellIndex];
+			var touchedEntry = m_entries [cellIndex];
 			bool isTouchingToClose = touchedEntry.IsOpen;
 
-			var entriesToClose = m_entries.Where(e => e.IsOpen);
-			foreach (var entry in entriesToClose)
-			{
-				CloseAccordion(entry);
+			var entriesToClose = m_entries.Where (e => e.IsOpen);
+			foreach (var entry in entriesToClose) {
+				CloseAccordion (entry);
 				entry.IsOpen = false;
 			}
 
 
-			if (!isTouchingToClose)
-			{
-				OpenAccordion(touchedEntry);
+			if (!isTouchingToClose) {
+				OpenAccordion (touchedEntry);
 				touchedEntry.IsOpen = true;
 			}
 		}
