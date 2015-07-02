@@ -8,7 +8,7 @@ namespace Accordion.Forms
 	/// <summary>
 	/// Area devices list page.
 	/// </summary>
-	public class AccordionControl : StackLayout
+	public class AccordionControl : Grid
 	{
 		/// <summary>
 		/// Gets or sets the default color of the button background.
@@ -24,7 +24,7 @@ namespace Accordion.Forms
 
 		readonly List<AccordionEntry> m_entries = new List<AccordionEntry> ();
 		ScrollView m_scrollView;
-		StackLayout m_layout;
+		StackLayout m_cellStackLayout;
 
 		uint AnimationDuration { get; set; }
 
@@ -38,32 +38,44 @@ namespace Accordion.Forms
 			DefaultButtonTextColor = Color.Black;
 			Padding = new Thickness (0, 0, 0, 0);
 
-			Orientation = StackOrientation.Vertical;
-			Spacing = 0;
+//			Orientation = StackOrientation.Vertical;
+//			Spacing = 0;
 
-			m_layout = new StackLayout () {
+			RowDefinitions.Add (new RowDefinition { Height = GridLength.Auto });
+			RowDefinitions.Add (new RowDefinition { Height = GridLength.Auto });
+			ColumnDefinitions.Add (new ColumnDefinition { Width = new GridLength (1, GridUnitType.Star) });
+
+
+			RowSpacing = 0;
+			ColumnSpacing = 0;
+
+			m_cellStackLayout = new StackLayout () {
 				BackgroundColor = DefaultButtonBackgroundColor,
 				Orientation = StackOrientation.Vertical,
 				Spacing = 0
 			};
 					
 			var shadowImage = new Image () {
-				Source = "HeaderShadow.png"
+				Source = "HeaderShadow.png",
+				InputTransparent = true,
+				VerticalOptions = LayoutOptions.Start
 			};
 
-			if (header != null) {
-				Children.Add (header);
-//				Children.Add (shadowImage);
-			}
 
 			m_scrollView = new ScrollView () {
 				BackgroundColor = DefaultButtonBackgroundColor,
-				Content = m_layout,
+				Content = m_cellStackLayout,
 				Orientation = ScrollOrientation.Vertical,
 				VerticalOptions = LayoutOptions.FillAndExpand,
 			};
 
-			Children.Add (m_scrollView);
+			Children.Add (m_scrollView, 0, 1);
+
+			if (header != null) {
+				Children.Add (header, 0, 0);
+				Children.Add (shadowImage, 0, 1);
+			}
+
 		}
 
 		/// <summary>
@@ -90,8 +102,8 @@ namespace Accordion.Forms
 
 			m_entries.Add (entry);
 
-			m_layout.Children.Add (entry.Cell);
-			m_layout.Children.Add (entry.View);
+			m_cellStackLayout.Children.Add (entry.Cell);
+			m_cellStackLayout.Children.Add (entry.View);
 
 
 			var cellIndex = m_entries.Count - 1;
