@@ -8,7 +8,7 @@ namespace Accordion.Forms
 	/// <summary>
 	/// Area devices list page.
 	/// </summary>
-	public class AccordionControl : ScrollView
+	public class AccordionControl : StackLayout
 	{
 		/// <summary>
 		/// Gets or sets the default color of the button background.
@@ -38,25 +38,33 @@ namespace Accordion.Forms
 			DefaultButtonTextColor = Color.Black;
 			Padding = new Thickness (0, 0, 0, 0);
 
+			Orientation = StackOrientation.Vertical;
+			Spacing = 0;
+
 			m_layout = new StackLayout () {
 				BackgroundColor = DefaultButtonBackgroundColor,
 				Orientation = StackOrientation.Vertical,
 				Spacing = 0
 			};
+					
+			var shadowImage = new Image () {
+				Source = "HeaderShadow.png"
+			};
 
-			if (header != null)
-				m_layout.Children.Add (header);
+			if (header != null) {
+				Children.Add (header);
+//				Children.Add (shadowImage);
+			}
 
 			m_scrollView = new ScrollView () {
 				BackgroundColor = DefaultButtonBackgroundColor,
 				Content = m_layout,
 				Orientation = ScrollOrientation.Vertical,
-				VerticalOptions = LayoutOptions.FillAndExpand
+				VerticalOptions = LayoutOptions.FillAndExpand,
 			};
 
-			Content = m_scrollView;
+			Children.Add (m_scrollView);
 		}
-
 
 		/// <summary>
 		/// Add the specified cell and view.
@@ -82,14 +90,9 @@ namespace Accordion.Forms
 
 			m_entries.Add (entry);
 
-			var line = new StackLayout () {
-				Orientation = StackOrientation.Vertical
-			};
+			m_layout.Children.Add (entry.Cell);
+			m_layout.Children.Add (entry.View);
 
-			line.Children.Add (entry.Cell);
-			line.Children.Add (entry.View);
-
-			m_layout.Children.Add (line);
 
 			var cellIndex = m_entries.Count - 1;
 
@@ -117,8 +120,8 @@ namespace Accordion.Forms
 					entry.View.IsVisible = true;
 					entry.View.HeightRequest = entry.OriginalSize.Height * x;
 				}, 0, AnimationDuration, Easing.SpringOut, (d, b) => {
-					entry.View.IsVisible = true;
-				});
+				entry.View.IsVisible = true;
+			});
 		}
 
 		async void CloseAccordion (AccordionEntry entry)
@@ -128,8 +131,8 @@ namespace Accordion.Forms
 					var change = entry.OriginalSize.Height * x;
 					entry.View.HeightRequest = entry.OriginalSize.Height - change;
 				}, 0, AnimationDuration, Easing.SpringIn, (d, b) => {
-					entry.View.IsVisible = false;
-				});
+				entry.View.IsVisible = false;
+			});
 		}
 
 
