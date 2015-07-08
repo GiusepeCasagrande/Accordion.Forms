@@ -15,10 +15,9 @@ namespace Accordion.Forms
 		{
 			m_header = new BoxView () {
 				BackgroundColor = Color.Red,
-				HeightRequest = 250,
+				HeightRequest = 300,
 				HorizontalOptions = LayoutOptions.FillAndExpand
 			};
-
 
 			m_innerViews = new List<SampleInnerView> ();
 			for (int i = 0; i < 12; i++) {
@@ -28,6 +27,7 @@ namespace Accordion.Forms
 
 		protected override void OnAppearing()
 		{
+
 			IsBusy = true;
 			base.OnAppearing();
 			NavigationPage.SetHasNavigationBar(this, false);

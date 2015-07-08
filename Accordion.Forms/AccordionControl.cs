@@ -2,6 +2,7 @@
 using Xamarin.Forms;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Accordion.Forms
 {
@@ -22,11 +23,17 @@ namespace Accordion.Forms
 		/// <value>The default color of the button text.</value>
 		public Color DefaultButtonTextColor { get; set; }
 
+		/// <summary>
+		/// Gets or sets the duration of the animation.
+		/// </summary>
+		/// <value>The duration of the animation.</value>
+		public uint AnimationDuration { get; set; }
+
 		readonly List<AccordionEntry> m_entries = new List<AccordionEntry> ();
 		ScrollView m_scrollView;
 		StackLayout m_cellStackLayout;
-
-		uint AnimationDuration { get; set; }
+		ScrolledEventArgs m_scrolledEventArgs;
+		double m_lastScrollPosition;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Photon.Controls.AccordionControl"/> class.
@@ -37,9 +44,6 @@ namespace Accordion.Forms
 			BackgroundColor = DefaultButtonBackgroundColor;
 			DefaultButtonTextColor = Color.Black;
 			Padding = new Thickness (0, 0, 0, 0);
-
-//			Orientation = StackOrientation.Vertical;
-//			Spacing = 0;
 
 			RowDefinitions.Add (new RowDefinition { Height = GridLength.Auto });
 			RowDefinitions.Add (new RowDefinition { Height = GridLength.Auto });
@@ -58,7 +62,9 @@ namespace Accordion.Forms
 			var shadowImage = new Image () {
 				Source = "HeaderShadow.png",
 				InputTransparent = true,
-				VerticalOptions = LayoutOptions.Start
+				VerticalOptions = LayoutOptions.Start,
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				Aspect = Aspect.Fill
 			};
 
 
@@ -68,6 +74,8 @@ namespace Accordion.Forms
 				Orientation = ScrollOrientation.Vertical,
 				VerticalOptions = LayoutOptions.FillAndExpand,
 			};
+
+			m_scrollView.Scrolled += AccordionViewScrolled;
 
 			Children.Add (m_scrollView, 0, 1);
 
@@ -109,7 +117,7 @@ namespace Accordion.Forms
 			var cellIndex = m_entries.Count - 1;
 
 			var tapGestureRecognizer = new TapGestureRecognizer ();
-			tapGestureRecognizer.Tapped	+= (object sender, EventArgs e) => OncellTouchUpInside (cellIndex);
+			tapGestureRecognizer.Tapped	+= (object sender, EventArgs e) => OnCellTouchUpInside (cellIndex);
 			cell.GestureRecognizers.Add (tapGestureRecognizer);
 		}
 
@@ -127,10 +135,20 @@ namespace Accordion.Forms
 
 		async void OpenAccordion (AccordionEntry entry)
 		{
+			// Get the element (cell) touched
+			var element = m_cellStackLayout.Children.FirstOrDefault (x => x == entry.Cell);
+			if (element == null)
+				return;
+
 			entry.View.Animate ("expand",
 				x => {
 					entry.View.IsVisible = true;
 					entry.View.HeightRequest = entry.OriginalSize.Height * x;
+
+					// calculate te position to be scrolled based on the X from Animate and element Y position
+					var position = element.Y * x;
+					m_scrollView.ScrollToAsync (0, position, false);
+
 				}, 0, AnimationDuration, Easing.SpringOut, (d, b) => {
 				entry.View.IsVisible = true;
 			});
@@ -146,14 +164,12 @@ namespace Accordion.Forms
 				entry.View.IsVisible = false;
 			});
 		}
-
-
-
+			
 		/// <summary>
 		/// Raises the cell touch up inside event.
 		/// </summary>
 		/// <param name="cellIndex">cell index.</param>
-		void OncellTouchUpInside (int cellIndex)
+		void OnCellTouchUpInside (int cellIndex)
 		{
 			var touchedEntry = m_entries [cellIndex];
 			bool isTouchingToClose = touchedEntry.IsOpen;
@@ -163,12 +179,16 @@ namespace Accordion.Forms
 				CloseAccordion (entry);
 				entry.IsOpen = false;
 			}
-
-
+				
 			if (!isTouchingToClose) {
 				OpenAccordion (touchedEntry);
 				touchedEntry.IsOpen = true;
 			}
+		}
+
+		void AccordionViewScrolled (object sender, ScrolledEventArgs e)
+		{
+			m_scrolledEventArgs = e;
 		}
 	}
 }
