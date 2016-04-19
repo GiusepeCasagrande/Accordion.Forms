@@ -106,6 +106,7 @@
     <BundleResource Include="Resources\Icon-Small-40%403x.png" />
     <BundleResource Include="Resources\HeaderShadow%402x.png" />
     <BundleResource Include="Resources\HeaderShadow%403x.png" />
+    <BundleResource Include="Resources\HeaderImage.jpg" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />

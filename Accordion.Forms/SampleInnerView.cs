@@ -9,19 +9,19 @@ namespace Accordion.Forms
 		Label m_labelDeviceName;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Photon.Views.AreaDetail.Details.LampDetailView"/> class.
-		/// </summary>
+        /// Initializes a new instance of the <see cref="T:Accordion.Forms.SampleInnerView"/> class.
+        /// </summary>
 		public SampleInnerView()
 		{
 			SetupLabel();
 			SetupSlider();
 
-			HeightRequest = 100;
+			HeightRequest = 150;
 			Orientation = StackOrientation.Vertical;
 			HorizontalOptions = LayoutOptions.Fill;
-			BackgroundColor = Color.Gray;
-			Children.Add(m_labelDeviceName);
-			Children.Add(m_slider);
+            BackgroundColor = Color.FromHex("443427");
+            Children.Add(m_slider);
+			Children.Add(m_labelDeviceName);	
 		}
 
 		/// <summary>
@@ -31,10 +31,12 @@ namespace Accordion.Forms
 		{
 			m_labelDeviceName = new Label
 			{
-				Text = "Label 1",
+				Text = "A label insinde the accordion.",
+                TextColor = Color.White,
 				FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
 				FontAttributes = FontAttributes.Bold,
-				VerticalOptions = LayoutOptions.Center
+				VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.Center
 			};
 		}
 
@@ -46,7 +48,8 @@ namespace Accordion.Forms
 			m_slider = new Slider()
 			{
 				Minimum = 0,
-				Maximum = 100
+				Maximum = 100,
+                HeightRequest = 50
 			};
 		}
 	}
