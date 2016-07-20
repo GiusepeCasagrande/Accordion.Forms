@@ -1,9 +1,0 @@
-﻿<Properties StartupItem="iOS/Accordion.Forms.iOS.csproj">
-  <MonoDevelop.Ide.ItemProperties.Accordion.Forms.iOS PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.3941A414-0AAB-453D-951D-ED98CB624451" />
-  <MonoDevelop.Ide.Workbench />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-</Properties>
